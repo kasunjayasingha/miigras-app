@@ -11,6 +11,7 @@ annotation = "1.8.0"
 lifecycleLivedataKtx = "2.8.3"
 lifecycleViewmodelKtx = "2.8.3"
 volley = "1.2.1"
+bumptech = "4.15.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -24,6 +25,7 @@ annotation = { group = "androidx.annotation", name = "annotation", version.ref =
 lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
+bumptech = { group = "com.github.bumptech.glide", name = "glide", version.ref = "bumptech" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
