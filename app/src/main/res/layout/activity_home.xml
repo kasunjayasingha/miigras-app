@@ -44,11 +44,10 @@
                         app:srcCompat="@drawable/user_1" />
 
                     <TextView
-                        android:id="@+id/textView5"
+                        android:id="@+id/employeeName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="32dp"
-                        android:text="Hi, Kasun"
                         android:textColor="@color/white"
                         android:textSize="20sp"
                         android:textStyle="bold"

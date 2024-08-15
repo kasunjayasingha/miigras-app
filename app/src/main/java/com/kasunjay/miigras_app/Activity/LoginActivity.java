@@ -18,11 +18,17 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.kasunjay.miigras_app.data.model.AddressDTO;
+import com.kasunjay.miigras_app.data.model.AgencyDTO;
+import com.kasunjay.miigras_app.data.model.EmployeeDTO;
+import com.kasunjay.miigras_app.data.model.PersonDTO;
 import com.kasunjay.miigras_app.databinding.ActivityLoginBinding;
+import com.kasunjay.miigras_app.util.GlobalData;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +38,8 @@ import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
-    String URL = "http://192.168.1.101:8081/api/v1/user/login";
+    String URL = GlobalData.BASE_URL + "/api/v1/user/login";
+    String getEmployeeURL = GlobalData.BASE_URL + "/api/v1/mobile/getEmployeeByUserId";
 
     Button btn;
     EditText username, password;
@@ -40,11 +47,13 @@ public class LoginActivity extends AppCompatActivity {
     Boolean isInternetAvailable = false;
 private ActivityLoginBinding binding;
 
-    private static final String SHARED_PREF_NAME = "my_shared_pref";
+    private static final String SHARED_PREF_NAME = "user_login_pref";
+    private static final String SHARED_PREF_EMPLOYEE_DETAILS = "employee_details";
     private static final String KEY_ACCESS_TOKEN = "access_token";
 
 
     SharedPreferences sharedPref;
+    SharedPreferences employeeDetails;
     private ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
 
@@ -62,6 +71,7 @@ private ActivityLoginBinding binding;
         internet_check();
 
         sharedPref = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        employeeDetails = getSharedPreferences(SHARED_PREF_EMPLOYEE_DETAILS, Context.MODE_PRIVATE);
 
         btn.setOnClickListener(view -> {
             userNameTxt = username.getText().toString();
@@ -144,25 +154,50 @@ private ActivityLoginBinding binding;
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URL, payload,
                 response -> {
                     try {
+
                         Long id = response.getLong("id");
                         String role = response.getString("role");
                         String accessToken = response.getString("accessToken");
 
                         // Save the access token in SharedPreferences
                         SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putLong("userId", id);
+                        editor.putString("role", role);
                         editor.putString(KEY_ACCESS_TOKEN, accessToken);
                         editor.apply();
+                        setEmployee();
 
-                        Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                        startActivity(intent);
+                        Log.d(TAG, "sharedPref: " + sharedPref.getString(KEY_ACCESS_TOKEN, ""));
+
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 },
-//                error -> Toast.makeText(getApplicationContext(), "Login failed: " + error.getMessage(), Toast.LENGTH_SHORT).show()
-                error -> Log.d(TAG, "onErrorResponse: " + error.getMessage())) {
+                error -> {
+                    // Handle Volley error
+                    NetworkResponse networkResponse = error.networkResponse;
+                    String errorMessage = "";
+
+                    if (networkResponse != null) {
+                        String result = new String(networkResponse.data);
+                        try {
+                            JSONObject response = new JSONObject(result);
+//                            String status = response.optString("status", "Unknown status");
+//                            String message = response.optString("message", "No message");
+                            String errorResponse = response.optString("error", "No error details");
+                            errorMessage = "Error: " + errorResponse;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            errorMessage = "JSON parsing error in error response: " + e.getMessage();
+                        }
+                    } else {
+                        errorMessage = error.getClass().getSimpleName() + ": " + error.getMessage();
+                    }
+
+                    Log.e(TAG, "onErrorResponse: " + errorMessage);
+                    Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
+                }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
@@ -171,6 +206,56 @@ private ActivityLoginBinding binding;
             }
         };
 
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(jsonObjectRequest);
+    }
+
+    private void setEmployee() {
+        getEmployeeURL = GlobalData.BASE_URL + "/api/v1/mobile/getEmployeeByUserId";
+        getEmployeeURL = getEmployeeURL + "?userId=" + sharedPref.getLong("userId", 0);
+        Log.d(TAG, "getEmployeeURL: " + getEmployeeURL);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, getEmployeeURL, null,
+                response -> {
+
+                    employeeDetails.edit().putString(SHARED_PREF_EMPLOYEE_DETAILS, response.toString()).apply();
+                    Log.d(TAG, "Employee: " + employeeDetails.getString(SHARED_PREF_EMPLOYEE_DETAILS, ""));
+
+                    Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                    startActivity(intent);
+
+                },
+                error -> {
+                    // Handle Volley error
+                    NetworkResponse networkResponse = error.networkResponse;
+                    String errorMessage = "";
+
+                    if (networkResponse != null) {
+                        String result = new String(networkResponse.data);
+                        try {
+                            JSONObject response = new JSONObject(result);
+                            String errorResponse = response.optString("error", "No error details");
+                            errorMessage = "Error: " + errorResponse;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            errorMessage = "JSON parsing error in error response: " + e.getMessage();
+                        }
+                    } else {
+//                        errorMessage = error.getClass().getSimpleName() + ": " + error.getMessage();
+                        errorMessage = "No employee details found!";
+                    }
+
+                    Log.e(TAG, "onErrorResponse: " + errorMessage);
+                    Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                headers.put("Access-Token", "Bearer " + sharedPref.getString(KEY_ACCESS_TOKEN, ""));
+                return headers;
+            }
+        };
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(jsonObjectRequest);
     }

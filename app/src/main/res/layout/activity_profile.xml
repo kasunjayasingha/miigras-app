@@ -80,10 +80,9 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/employeeName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Kasun"
                 android:textStyle="bold"
                 android:layout_marginTop="8dp"
                 android:textAlignment="center"
@@ -91,10 +90,9 @@
                 android:textSize="26sp" />
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/employeeEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="kasun@gmail.com"
                 android:textAlignment="center"
                 android:textColor="@color/dark_blue"
                 android:textSize="12sp" />
