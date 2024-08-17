@@ -26,7 +26,7 @@ lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-lived
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 bumptech = { group = "com.github.bumptech.glide", name = "glide", version.ref = "bumptech" }
-
+location = { group = "com.google.android.gms", name = "play-services-location", version = "21.3.0" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 
