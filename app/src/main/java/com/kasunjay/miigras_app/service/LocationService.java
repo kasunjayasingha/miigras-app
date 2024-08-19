@@ -45,6 +45,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class LocationService extends Service {
 
@@ -88,31 +89,20 @@ public class LocationService extends Service {
     }
 
     private void requestLocationUpdates() {
-//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            return;
-//        }
-//        Log.d(TAG, "requestLocationUpdates: 1");
-//        fusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Location> task) {
-//                if (task.isSuccessful() && task.getResult() != null) {
-//                    Log.d(TAG, "onComplete: Got location");
-//                    sendLocationToServer(task.getResult());
-//                }else {
-//                    Log.e(TAG, "onComplete: Failed to get location");
-//                    task.getException().printStackTrace();
-//                }
-//
-//            }
-//        });
-
-
         Log.d(TAG, "requestLocationUpdates: ");
 //        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY , 10 * 60 * 1000)
 //                .setMinUpdateIntervalMillis(5 * 60 * 1000)
 //                .build();
-        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 120000) // 2 minutes
-                .setMinUpdateIntervalMillis(120000) // 2 minutes
+//        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 120000) // 2 minutes
+//                .setMinUpdateIntervalMillis(120000) // 2 minutes
+//                .build();
+
+        Random random = new Random();
+// Generate a random interval between 1 minute (60000 ms) and 5 minutes (300000 ms)
+        long randomInterval = 60000 + random.nextInt(1140000); // 1140000 ms is the range (20 minutes - 1 minute)
+
+        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, randomInterval)
+                .setMinUpdateIntervalMillis(randomInterval)
                 .build();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -120,32 +110,6 @@ public class LocationService extends Service {
             return;
         }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-
-//        CurrentLocationRequest currentLocationRequest = new CurrentLocationRequest.Builder()
-//                .setGranularity(Granularity.GRANULARITY_FINE)
-//                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-//                .setDurationMillis(120000) // 2 minutes
-//                .setMaxUpdateAgeMillis(0) // 2 minutes
-//                .build();
-//
-//        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            return;
-//        }
-//        fusedLocationClient.getCurrentLocation(currentLocationRequest, cancellationTokenSource.getToken())
-//                .addOnCompleteListener(new OnCompleteListener<Location>() {
-//                                           @Override
-//                                           public void onComplete(@NonNull Task<Location> task) {
-//                                               if (task.isSuccessful() && task.getResult() != null) {
-//                                                   Log.d(TAG, "onComplete: Got location");
-//                                                   sendLocationToServer(task.getResult());
-//                                               } else {
-//                                                   Log.e(TAG, "onComplete: Failed to get location");
-//                                                   task.getException().printStackTrace();
-//                                               }
-//                                           }
-//                                       });
-
     }
 
     private final LocationCallback locationCallback = new LocationCallback() {
