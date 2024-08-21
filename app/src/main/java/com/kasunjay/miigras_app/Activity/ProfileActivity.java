@@ -1,30 +1,29 @@
 package com.kasunjay.miigras_app.Activity;
 
+import static com.kasunjay.miigras_app.util.Constants.BASE_URL;
+import static com.kasunjay.miigras_app.util.Constants.KEY_ACCESS_TOKEN;
+import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_EMPLOYEE_DETAILS;
+import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_NAME;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.kasunjay.miigras_app.R;
 import com.kasunjay.miigras_app.databinding.ActivityProfileBinding;
 import com.kasunjay.miigras_app.service.LocationService;
-import com.kasunjay.miigras_app.util.GlobalData;
+import com.kasunjay.miigras_app.util.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,12 +36,9 @@ public class ProfileActivity extends AppCompatActivity {
     private ActivityProfileBinding binding;
     private static final String TAG = "ProfileActivity";
 
-    private static final String SHARED_PREF_NAME = "user_login_pref";
-    private static final String SHARED_PREF_EMPLOYEE_DETAILS = "employee_details";
-    private static final String KEY_ACCESS_TOKEN = "access_token";
     private static String ACCESS_TOKEN = "";
     private static long userId = 0;
-    String URL = GlobalData.BASE_URL + "/api/v1/user/logout";
+    String URL = BASE_URL + "/api/v1/user/logout";
 
     SharedPreferences sharedPref;
     SharedPreferences employeeDetails;

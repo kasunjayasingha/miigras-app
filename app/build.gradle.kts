@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -12,6 +13,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,7 +48,16 @@ dependencies {
     implementation(libs.volley)
     implementation(libs.bumptech)
     implementation(libs.location)
+    implementation(libs.sdp)
+    implementation(libs.ssp)
+    implementation(libs.multidex)
+    implementation(libs.firebase)
+    implementation(libs.roundedimageview)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }
+
+apply(plugin = "com.google.gms.google-services")

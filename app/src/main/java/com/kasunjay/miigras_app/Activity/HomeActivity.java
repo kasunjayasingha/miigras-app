@@ -1,5 +1,9 @@
 package com.kasunjay.miigras_app.Activity;
 
+import static com.kasunjay.miigras_app.util.Constants.KEY_ACCESS_TOKEN;
+import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_EMPLOYEE_DETAILS;
+import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_NAME;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -28,9 +32,6 @@ public class HomeActivity extends AppCompatActivity {
     private RecyclerView.Adapter adapterNewsList;
     private RecyclerView recyclerViewNewsList;
 
-    private static final String SHARED_PREF_NAME = "user_login_pref";
-    private static final String SHARED_PREF_EMPLOYEE_DETAILS = "employee_details";
-    private static final String KEY_ACCESS_TOKEN = "access_token";
     private static String ACCESS_TOKEN = "";
     private static long userId = 0;
 

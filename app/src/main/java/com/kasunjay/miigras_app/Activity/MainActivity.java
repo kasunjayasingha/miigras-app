@@ -3,6 +3,7 @@ package com.kasunjay.miigras_app.Activity;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -31,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
         btn = findViewById(R.id.loginBtn);
 
 //        Handle login button click
@@ -49,7 +49,21 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) != PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                (ActivityCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_LOCATION) != PackageManager.PERMISSION_GRANTED && Build.VERSION.SDK_INT >= 34) ||
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED){
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Permissions required")
+                        .setMessage("Post notifications permission is required to proceed")
+                        .setPositiveButton("OK", (dialog, which) -> {
+                            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, PERMISSION_REQUEST_CODE);
+                            dialog.dismiss();
+                        })
+                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
 
             if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -95,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                         .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                         .show();
             }
-            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            if((ActivityCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_LOCATION) != PackageManager.PERMISSION_GRANTED) && Build.VERSION.SDK_INT >= 34){
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("Permissions required")
                         .setMessage("Foreground service location permission is required to proceed")
@@ -128,10 +142,11 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "Access background location permission is required to proceed", Toast.LENGTH_SHORT).show();
                 }else if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "Foreground service permission is required to proceed", Toast.LENGTH_SHORT).show();
-                }else if(ActivityCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                }else if((ActivityCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_LOCATION) != PackageManager.PERMISSION_GRANTED) && Build.VERSION.SDK_INT >= 34){
                     Toast.makeText(this, "Foreground service location permission is required to proceed", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                }else if(ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED){
+                    Toast.makeText(this, "Post notifications permission is required to proceed", Toast.LENGTH_SHORT).show();
+                } else {
                     Toast.makeText(this, "All location permissions are required to proceed", Toast.LENGTH_SHORT).show();
                 }
 
@@ -144,7 +159,8 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) == PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+                (ActivityCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_LOCATION) == PackageManager.PERMISSION_GRANTED || Build.VERSION.SDK_INT < 34) &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void proceedToNextActivity() {

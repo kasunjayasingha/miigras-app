@@ -1,5 +1,5 @@
 [versions]
-agp = "8.5.1"
+agp = "8.5.2"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -12,6 +12,8 @@ lifecycleLivedataKtx = "2.8.3"
 lifecycleViewmodelKtx = "2.8.3"
 volley = "1.2.1"
 bumptech = "4.15.1"
+firebaseMessaging = "24.0.0"
+firebaseFirestore = "25.0.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -27,6 +29,17 @@ lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-view
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 bumptech = { group = "com.github.bumptech.glide", name = "glide", version.ref = "bumptech" }
 location = { group = "com.google.android.gms", name = "play-services-location", version = "21.3.0" }
+sdp = { group = "com.intuit.sdp", name = "sdp-android", version = "1.0.6" }
+ssp = { group = "com.intuit.ssp", name = "ssp-android", version = "1.0.6" }
+roundedimageview = { group = "com.makeramen", name = "roundedimageview", version = "2.3.0" }
+multidex = { group = "androidx.multidex", name = "multidex", version = "2.0.1" }
+
+# Firebase
+firebase = { group = "com.google.firebase", name = "firebase-bom", version = "33.1.2" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 

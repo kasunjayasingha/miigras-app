@@ -1,5 +1,10 @@
 package com.kasunjay.miigras_app.Activity;
 
+import static com.kasunjay.miigras_app.util.Constants.BASE_URL;
+import static com.kasunjay.miigras_app.util.Constants.KEY_ACCESS_TOKEN;
+import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_EMPLOYEE_DETAILS;
+import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_NAME;
+
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -15,12 +20,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -31,13 +36,9 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.kasunjay.miigras_app.data.model.AddressDTO;
-import com.kasunjay.miigras_app.data.model.AgencyDTO;
-import com.kasunjay.miigras_app.data.model.EmployeeDTO;
-import com.kasunjay.miigras_app.data.model.PersonDTO;
 import com.kasunjay.miigras_app.databinding.ActivityLoginBinding;
 import com.kasunjay.miigras_app.service.LocationService;
-import com.kasunjay.miigras_app.util.GlobalData;
+import com.kasunjay.miigras_app.util.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,8 +49,8 @@ import java.util.Map;
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
-    String URL = GlobalData.BASE_URL + "/api/v1/user/login";
-    String getEmployeeURL = GlobalData.BASE_URL + "/api/v1/mobile/getEmployeeByUserId";
+    String URL = BASE_URL + "/api/v1/user/login";
+    String getEmployeeURL = BASE_URL + "/api/v1/mobile/getEmployeeByUserId";
     private static final int PERMISSION_REQUEST_CODE = 100;
 
     Button btn;
@@ -57,11 +58,6 @@ public class LoginActivity extends AppCompatActivity {
     String username_shred, password_shred, token_shred, userNameTxt, passwordTxt;
     Boolean isInternetAvailable = false;
 private ActivityLoginBinding binding;
-
-    private static final String SHARED_PREF_NAME = "user_login_pref";
-    private static final String SHARED_PREF_EMPLOYEE_DETAILS = "employee_details";
-    private static final String KEY_ACCESS_TOKEN = "access_token";
-
 
     SharedPreferences sharedPref;
     SharedPreferences employeeDetails;
@@ -101,6 +97,7 @@ private ActivityLoginBinding binding;
         } else if (!isPasswordValid(password)) {
             Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
         } else {
+            loading(true);
             checkPermissions();
         }
     }
@@ -186,6 +183,7 @@ private ActivityLoginBinding binding;
                     }
                 },
                 error -> {
+                    loading(false);
                     // Handle Volley error
                     NetworkResponse networkResponse = error.networkResponse;
                     String errorMessage = "";
@@ -222,7 +220,7 @@ private ActivityLoginBinding binding;
     }
 
     private void setEmployee() {
-        getEmployeeURL = GlobalData.BASE_URL + "/api/v1/mobile/getEmployeeByUserId";
+        getEmployeeURL = BASE_URL + "/api/v1/mobile/getEmployeeByUserId";
         getEmployeeURL = getEmployeeURL + "?userId=" + sharedPref.getLong("userId", 0);
         Log.d(TAG, "getEmployeeURL: " + getEmployeeURL);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, getEmployeeURL, null,
@@ -231,6 +229,7 @@ private ActivityLoginBinding binding;
                     employeeDetails.edit().putString(SHARED_PREF_EMPLOYEE_DETAILS, response.toString()).apply();
                     Log.d(TAG, "Employee: " + employeeDetails.getString(SHARED_PREF_EMPLOYEE_DETAILS, ""));
 
+                    loading(false);
                     Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
 
                     createNotificationChannel();
@@ -239,9 +238,11 @@ private ActivityLoginBinding binding;
 
                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                     startActivity(intent);
+                    finish();
 
                 },
                 error -> {
+                    loading(false);
                     // Handle Volley error
                     NetworkResponse networkResponse = error.networkResponse;
                     String errorMessage = "";
@@ -331,6 +332,16 @@ private ActivityLoginBinding binding;
             if (notificationManager != null) {
                 notificationManager.createNotificationChannel(channel);
             }
+        }
+    }
+
+    private void loading(Boolean isLoading) {
+        if (isLoading) {
+            binding.loginBtn.setVisibility(View.INVISIBLE);
+            binding.progressBarCl.setVisibility(View.VISIBLE);
+        }else {
+            binding.loginBtn.setVisibility(View.VISIBLE);
+            binding.progressBarCl.setVisibility(View.INVISIBLE);
         }
     }
 

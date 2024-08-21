@@ -4,11 +4,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -17,8 +15,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.kasunjay.miigras_app.R;
-import com.kasunjay.miigras_app.service.LocationService;
-import com.kasunjay.miigras_app.util.GlobalData;
+import com.kasunjay.miigras_app.util.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +26,7 @@ import java.util.Map;
 public class SplashActivity extends AppCompatActivity {
 
     private static final String TAG = "SplashActivity";
-    String getEmployeeURL = GlobalData.BASE_URL + "/api/v1/mobile/getEmployeeByUserId";
+    String getEmployeeURL = Constants.BASE_URL + "/api/v1/mobile/getEmployeeByUserId";
 
     private static final String SHARED_PREF_NAME = "user_login_pref";
     private static final String SHARED_PREF_EMPLOYEE_DETAILS = "employee_details";
@@ -64,7 +61,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void setEmployee() {
-        getEmployeeURL = GlobalData.BASE_URL + "/api/v1/mobile/getEmployeeByUserId";
+        getEmployeeURL = Constants.BASE_URL + "/api/v1/mobile/getEmployeeByUserId";
         getEmployeeURL = getEmployeeURL + "?userId=" + sharedPref.getLong("userId", 0);
         Log.d(TAG, "getEmployeeURL: " + getEmployeeURL);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, getEmployeeURL, null,

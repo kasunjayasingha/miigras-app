@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "804949318356",
+    "project_id": "miigras-app",
+    "storage_bucket": "miigras-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:804949318356:android:7225fef1233f0dd377b941",
+        "android_client_info": {
+          "package_name": "com.kasunjay.miigras_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUFWX3cMvpa9QiSl_ZK6k05bhS0EyYaqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

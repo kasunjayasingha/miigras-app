@@ -6,4 +6,10 @@
     <color name="light_blue">#f2f1f6</color>
     <color name="gray01">#c5c5c5</color>
     <color name="gray02">#777777</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+    <color name="input_background">#ECECEC</color>
+    <color name="icon_background">#20FFFFFF</color>
+    <color name="error_red">#B00020</color>
+    <color name="received_message_background">#090D16</color>
 </resources>

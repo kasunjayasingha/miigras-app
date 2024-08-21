@@ -13,7 +13,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -24,21 +23,15 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.location.CurrentLocationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.Granularity;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
-import com.google.android.gms.tasks.CancellationTokenSource;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.kasunjay.miigras_app.Activity.MainActivity;
-import com.kasunjay.miigras_app.Activity.ProfileActivity;
 import com.kasunjay.miigras_app.R;
-import com.kasunjay.miigras_app.util.GlobalData;
+import com.kasunjay.miigras_app.util.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,7 +44,7 @@ public class LocationService extends Service {
 
     private static final String TAG = "LocationService";
 
-    String URL = GlobalData.BASE_URL + "/api/v1/mobile/updateLocation";
+    String URL = Constants.BASE_URL + "/api/v1/mobile/updateLocation";
 
     private FusedLocationProviderClient fusedLocationClient;
 
