@@ -2,6 +2,7 @@ package com.kasunjay.miigras_app.Activity;
 
 import static com.kasunjay.miigras_app.util.Constants.BASE_URL;
 import static com.kasunjay.miigras_app.util.Constants.KEY_ACCESS_TOKEN;
+import static com.kasunjay.miigras_app.util.Constants.KEY_COLLECTION_USERS;
 import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_EMPLOYEE_DETAILS;
 import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_NAME;
 
@@ -36,6 +37,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.kasunjay.miigras_app.databinding.ActivityLoginBinding;
 import com.kasunjay.miigras_app.service.LocationService;
 import com.kasunjay.miigras_app.util.Constants;
@@ -166,12 +168,14 @@ private ActivityLoginBinding binding;
                         Long id = response.getLong("id");
                         String role = response.getString("role");
                         String accessToken = response.getString("accessToken");
+                        Boolean isVerified = response.getBoolean("isFirebaseRegistered");
 
                         // Save the access token in SharedPreferences
                         SharedPreferences.Editor editor = sharedPref.edit();
                         editor.putLong("userId", id);
                         editor.putString("role", role);
                         editor.putString(KEY_ACCESS_TOKEN, accessToken);
+                        editor.putBoolean("isFirebaseRegistered", isVerified);
                         editor.apply();
                         setEmployee();
 
@@ -229,17 +233,15 @@ private ActivityLoginBinding binding;
                     employeeDetails.edit().putString(SHARED_PREF_EMPLOYEE_DETAILS, response.toString()).apply();
                     Log.d(TAG, "Employee: " + employeeDetails.getString(SHARED_PREF_EMPLOYEE_DETAILS, ""));
 
-                    loading(false);
-                    Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
-
-                    createNotificationChannel();
-                    Intent serviceIntent = new Intent(LoginActivity.this, LocationService.class);
-                    ContextCompat.startForegroundService(LoginActivity.this, serviceIntent);
-
-                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                    startActivity(intent);
-                    finish();
-
+                    if(!sharedPref.getBoolean("isFirebaseRegistered", false)) {
+                        try {
+                            registerUserInFirebase();
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }else {
+                        successLogin();
+                    }
                 },
                 error -> {
                     loading(false);
@@ -275,6 +277,81 @@ private ActivityLoginBinding binding;
         };
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(jsonObjectRequest);
+    }
+
+
+    private void registerUserInFirebase() throws JSONException {
+        JSONObject employee = new JSONObject(employeeDetails.getString(SHARED_PREF_EMPLOYEE_DETAILS, ""));
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        HashMap<String, Object> user = new HashMap<>();
+        user.put("userId", sharedPref.getLong("userId", 0));
+        user.put("role", sharedPref.getString("role", ""));
+        user.put("name", employee.getJSONObject("person").getString("firstName") + " " + employee.getJSONObject("person").getString("lastName"));
+        user.put("email", employee.getJSONObject("person").getString("email"));
+        db.collection(KEY_COLLECTION_USERS).document(String.valueOf(sharedPref.getLong("userId", 0)))
+                .set(user)
+                .addOnSuccessListener(aVoid -> {
+
+                    String updateURL = BASE_URL + "/api/v1/user/updateFirebaseStatus";
+                    updateURL = updateURL + "?userId=" + sharedPref.getLong("userId", 0);
+                    Log.d(TAG, "updateFirebaseURL: " + updateURL);
+                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, updateURL, null,
+                            response -> {
+                                successLogin();
+                            },
+                            error -> {
+                                loading(false);
+                                // Handle Volley error
+                                NetworkResponse networkResponse = error.networkResponse;
+                                String errorMessage = "";
+
+                                if (networkResponse != null) {
+                                    String result = new String(networkResponse.data);
+                                    try {
+                                        JSONObject response = new JSONObject(result);
+                                        String errorResponse = response.optString("error", "No error details");
+                                        errorMessage = "Error: " + errorResponse;
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                        errorMessage = "JSON parsing error in error response: " + e.getMessage();
+                                    }
+                                } else {
+                                    errorMessage = "Failed to update Firebase status!";
+                                }
+
+                                Log.e(TAG, "onErrorResponse: " + errorMessage);
+                                Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
+                            }) {
+                        @Override
+                        public Map<String, String> getHeaders() throws AuthFailureError {
+                            Map<String, String> headers = new HashMap<>();
+                            headers.put("Content-Type", "application/json");
+                            headers.put("Access-Token", "Bearer " + sharedPref.getString(KEY_ACCESS_TOKEN, ""));
+                            return headers;
+                        }
+                    };
+                    RequestQueue requestQueue = Volley.newRequestQueue(this);
+                    requestQueue.add(jsonObjectRequest);
+                })
+                .addOnFailureListener(e -> {
+                    loading(false);
+                    Toast.makeText(getApplicationContext(), "Failed to register user in Firebase", Toast.LENGTH_LONG).show();
+                });
+
+    }
+
+    private void successLogin() {
+        loading(false);
+        Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
+
+        createNotificationChannel();
+        Intent serviceIntent = new Intent(LoginActivity.this, LocationService.class);
+        ContextCompat.startForegroundService(LoginActivity.this, serviceIntent);
+
+        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void checkPermissions() {

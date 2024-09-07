@@ -21,6 +21,9 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.kasunjay.miigras_app.databinding.ActivityProfileBinding;
 import com.kasunjay.miigras_app.service.LocationService;
 import com.kasunjay.miigras_app.util.Constants;
@@ -86,20 +89,33 @@ public class ProfileActivity extends AppCompatActivity {
                     // Handle response
                 },
                 error -> {
-                    // Handle Volley error
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.clear();
-                    editor.apply();
+                    //        SignOut firebase
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    DocumentReference userRef = db.collection(Constants.KEY_COLLECTION_USERS).document(String.valueOf(userId));
+                    userRef.update(Constants.KEY_FCM_TOKEN, FieldValue.delete())
+                            .addOnSuccessListener(aVoid -> {
+                                // Sign-out successful
+                                SharedPreferences.Editor editor = sharedPref.edit();
+                                editor.clear();
+                                editor.apply();
 
-                    SharedPreferences.Editor editor1 = employeeDetails.edit();
-                    editor1.clear();
-                    editor1.apply();
+                                SharedPreferences.Editor editor1 = employeeDetails.edit();
+                                editor1.clear();
+                                editor1.apply();
 
-                    Intent serviceIntent = new Intent(ProfileActivity.this, LocationService.class);
-                    stopService(serviceIntent);
-                    startActivity(new android.content.Intent(ProfileActivity.this, MainActivity.class));
-                    finish();
-                    Toast.makeText(getApplicationContext(), "Logout successfully", Toast.LENGTH_LONG).show();
+                                Intent serviceIntent = new Intent(ProfileActivity.this, LocationService.class);
+                                stopService(serviceIntent);
+                                startActivity(new android.content.Intent(ProfileActivity.this, MainActivity.class));
+                                finish();
+                                Toast.makeText(getApplicationContext(), "Logout successfully", Toast.LENGTH_LONG).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                // An error occurred
+                                e.printStackTrace();
+                                Toast.makeText(getApplicationContext(), "Failed to logout", Toast.LENGTH_LONG).show();
+                            });
+
+
                 }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {

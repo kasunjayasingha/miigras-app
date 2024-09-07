@@ -1,6 +1,8 @@
 package com.kasunjay.miigras_app.Activity;
 
 import static com.kasunjay.miigras_app.util.Constants.KEY_ACCESS_TOKEN;
+import static com.kasunjay.miigras_app.util.Constants.KEY_COLLECTION_USERS;
+import static com.kasunjay.miigras_app.util.Constants.KEY_FCM_TOKEN;
 import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_EMPLOYEE_DETAILS;
 import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_NAME;
 
@@ -10,12 +12,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.kasunjay.miigras_app.Activity.chat.InboxActivity;
 import com.kasunjay.miigras_app.Adapter.NewsAdapter;
 import com.kasunjay.miigras_app.Domain.NewsDomain;
 import com.kasunjay.miigras_app.databinding.ActivityHomeBinding;
@@ -51,10 +58,12 @@ public class HomeActivity extends AppCompatActivity {
         
         initRecyclerView();
         BottomNavigation();
+        getToken();
 
         ACCESS_TOKEN = (sharedPref.getString(KEY_ACCESS_TOKEN, ""));
         userId = sharedPref.getLong("userId", 0);
         TextView employeeName = binding.employeeName;
+        LinearLayout chat = binding.chatLl;
 
         try {
             JSONObject employee = new JSONObject(employeeDetails.getString(SHARED_PREF_EMPLOYEE_DETAILS, ""));
@@ -62,6 +71,11 @@ public class HomeActivity extends AppCompatActivity {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+
+        chat.setOnClickListener(v -> {
+            startActivity(new android.content.Intent(HomeActivity.this, InboxActivity.class));
+            finish();
+        });
 
     }
 
@@ -90,5 +104,24 @@ public class HomeActivity extends AppCompatActivity {
         adapterNewsList = new NewsAdapter(newsList);
         recyclerViewNewsList.setAdapter(adapterNewsList);
 
+    }
+
+    private void getToken() {
+        FirebaseMessaging.getInstance().getToken().addOnSuccessListener(this::updateToken);
+    }
+
+    private void updateToken(String token) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference documentReference = db.collection(KEY_COLLECTION_USERS).document(String.valueOf(sharedPref.getLong("userId", 0)));
+        documentReference.update(KEY_FCM_TOKEN, token)
+                .addOnSuccessListener(aVoid -> {
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString(KEY_FCM_TOKEN, token);
+                    editor.apply();
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Failed to update token", Toast.LENGTH_SHORT).show();
+                });
     }
 }
