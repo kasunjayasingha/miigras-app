@@ -9,15 +9,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.kasunjay.miigras_app.data.model.ChatUser;
 import com.kasunjay.miigras_app.databinding.ChatUserContainerBinding;
+import com.kasunjay.miigras_app.listeners.UserListener;
 
 import java.util.List;
 
 public class ChatUserAdapter extends RecyclerView.Adapter<ChatUserAdapter.UserViewHolder> {
 
     private final List<ChatUser> chatUserList;
+    private final UserListener userListener;
 
-    public ChatUserAdapter(List<ChatUser> chatUserList) {
+    public ChatUserAdapter(List<ChatUser> chatUserList, UserListener userListener) {
         this.chatUserList = chatUserList;
+        this.userListener = userListener;
     }
 
     @NonNull
@@ -50,6 +53,7 @@ public class ChatUserAdapter extends RecyclerView.Adapter<ChatUserAdapter.UserVi
         void setUserData(ChatUser chatUser) {
             binding.chatUserName.setText(chatUser.getName());
             binding.chatUserRole.setText(chatUser.getJobType());
+            binding.getRoot().setOnClickListener(v -> userListener.onUserClicked(chatUser));
         }
     }
 }

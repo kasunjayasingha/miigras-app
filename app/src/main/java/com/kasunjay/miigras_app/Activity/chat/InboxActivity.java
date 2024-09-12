@@ -2,6 +2,7 @@ package com.kasunjay.miigras_app.Activity.chat;
 
 import static com.kasunjay.miigras_app.util.Constants.KEY_ACCESS_TOKEN;
 import static com.kasunjay.miigras_app.util.Constants.KEY_COLLECTION_USERS;
+import static com.kasunjay.miigras_app.util.Constants.KEY_USER;
 import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_EMPLOYEE_DETAILS;
 import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_NAME;
 
@@ -34,6 +35,7 @@ import com.kasunjay.miigras_app.Activity.SplashActivity;
 import com.kasunjay.miigras_app.Adapter.ChatUserAdapter;
 import com.kasunjay.miigras_app.data.model.ChatUser;
 import com.kasunjay.miigras_app.databinding.ActivityInboxBinding;
+import com.kasunjay.miigras_app.listeners.UserListener;
 import com.kasunjay.miigras_app.util.Constants;
 
 import org.json.JSONArray;
@@ -45,7 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InboxActivity extends AppCompatActivity {
+public class InboxActivity extends AppCompatActivity implements UserListener {
     private static final String TAG = "InboxActivity";
     private ActivityInboxBinding binding;
 
@@ -148,7 +150,7 @@ public class InboxActivity extends AppCompatActivity {
                             }
                             loading(false);
                             if (chatUserList.size() > 0) {
-                                ChatUserAdapter adapter = new ChatUserAdapter(chatUserList);
+                                ChatUserAdapter adapter = new ChatUserAdapter(chatUserList, this);
                                 binding.UserRecyclerView.setAdapter(adapter);
                                 binding.UserRecyclerView.setVisibility(View.VISIBLE);
                             } else {
@@ -221,4 +223,11 @@ public class InboxActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onUserClicked(ChatUser user) {
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra(KEY_USER, user);
+        startActivity(intent);
+        finish();
+    }
 }
