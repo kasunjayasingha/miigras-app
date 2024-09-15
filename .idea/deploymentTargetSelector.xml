@@ -3,11 +3,11 @@
   <component name="deploymentTargetSelector">
     <selectionStates>
       <SelectionState runConfigName="app">
-        <option name="selectionMode" value="DIALOG" />
-        <DropdownSelection timestamp="2024-08-18T16:54:20.097311900Z">
+        <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2024-09-15T14:36:35.578096300Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\kasun\.android\avd\Pixel_7a_API_33-kasun2.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CW41M31KN" />
             </handle>
           </Target>
         </DropdownSelection>

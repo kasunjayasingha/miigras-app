@@ -8,16 +8,36 @@ public class ChatMessage {
     private String receiverId;
     private String dateTime;
     private Date dateObject;
+    private String conversionId;
+    private String conversionName;
 
     public ChatMessage() {
     }
 
-    public ChatMessage(String message, String senderId, String receiverId, String dateTime, Date dateObject) {
+    public ChatMessage(String message, String senderId, String receiverId, String dateTime, Date dateObject, String conversionId, String conversionName) {
         this.message = message;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.dateTime = dateTime;
         this.dateObject = dateObject;
+        this.conversionId = conversionId;
+        this.conversionName = conversionName;
+    }
+
+    public String getConversionId() {
+        return conversionId;
+    }
+
+    public void setConversionId(String conversionId) {
+        this.conversionId = conversionId;
+    }
+
+    public String getConversionName() {
+        return conversionName;
+    }
+
+    public void setConversionName(String conversionName) {
+        this.conversionName = conversionName;
     }
 
     public Date getDateObject() {
