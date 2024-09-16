@@ -47,7 +47,7 @@
         android:layout_marginEnd="@dimen/_8sdp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="#545454"
+        android:textColor="#7E7D7D"
         android:textSize="@dimen/_14ssp"
         app:layout_constraintTop_toBottomOf="@id/vieSupporter"
         app:layout_constraintEnd_toEndOf="parent"

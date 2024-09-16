@@ -1,21 +1,30 @@
 package com.kasunjay.miigras_app.Activity.chat;
 
 import static com.kasunjay.miigras_app.util.Constants.KEY_COLLECTION_CHAT;
+import static com.kasunjay.miigras_app.util.Constants.KEY_COLLECTION_CONVERSIONS;
+import static com.kasunjay.miigras_app.util.Constants.KEY_LAST_MESSAGE;
 import static com.kasunjay.miigras_app.util.Constants.KEY_MESSAGE;
 import static com.kasunjay.miigras_app.util.Constants.KEY_RECEIVER_ID;
+import static com.kasunjay.miigras_app.util.Constants.KEY_RECEIVER_NAME;
 import static com.kasunjay.miigras_app.util.Constants.KEY_SENDER_ID;
+import static com.kasunjay.miigras_app.util.Constants.KEY_SENDER_NAME;
 import static com.kasunjay.miigras_app.util.Constants.KEY_TIMESTAMP;
 import static com.kasunjay.miigras_app.util.Constants.KEY_USER;
+import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_EMPLOYEE_DETAILS;
 import static com.kasunjay.miigras_app.util.Constants.SHARED_PREF_NAME;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -23,6 +32,9 @@ import com.kasunjay.miigras_app.Adapter.ChatAdapter;
 import com.kasunjay.miigras_app.data.model.ChatMessage;
 import com.kasunjay.miigras_app.data.model.ChatUser;
 import com.kasunjay.miigras_app.databinding.ActivityChatBinding;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,6 +53,9 @@ public class ChatActivity extends AppCompatActivity {
     private ChatAdapter chatAdapter;
     private FirebaseFirestore firestore;
     SharedPreferences sharedPref;
+    SharedPreferences employeeDetails;
+    private String conversationId = null;
+    JSONObject employee;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +64,12 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         sharedPref = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        employeeDetails = getSharedPreferences(SHARED_PREF_EMPLOYEE_DETAILS, Context.MODE_PRIVATE);
+        try {
+            employee = new JSONObject(employeeDetails.getString(SHARED_PREF_EMPLOYEE_DETAILS, ""));
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
 
         setListeners();
         loadReceiverUser();
@@ -75,6 +96,22 @@ public class ChatActivity extends AppCompatActivity {
         firestore.collection(KEY_COLLECTION_CHAT)
                 .add(message)
                 .addOnSuccessListener(documentReference -> {
+                    if(conversationId != null){
+                        updateConversion(binding.inputMessage.getText().toString());
+                    } else {
+                        HashMap<String, Object> conversion = new HashMap<>();
+                        conversion.put(KEY_SENDER_ID, sharedPref.getLong("userId", 0));
+                        try {
+                            conversion.put(KEY_SENDER_NAME, employee.getJSONObject("person").getString("firstName") + " " + employee.getJSONObject("person").getString("lastName"));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                        conversion.put(KEY_RECEIVER_ID, receiverUser.getUserId());
+                        conversion.put(KEY_RECEIVER_NAME, receiverUser.getName());
+                        conversion.put(KEY_LAST_MESSAGE, binding.inputMessage.getText().toString());
+                        conversion.put(KEY_TIMESTAMP, new Date());
+                        addConversion(conversion);
+                    }
                     binding.inputMessage.setText("");
                 })
                 .addOnFailureListener(e -> {
@@ -123,6 +160,10 @@ public class ChatActivity extends AppCompatActivity {
             binding.chatRecyclerView.setVisibility(android.view.View.VISIBLE);
         }
         binding.progressBar.setVisibility(android.view.View.GONE);
+
+        if(conversationId == null){
+            checkForConversion();
+        }
     };
 
     private void loadReceiverUser() {
@@ -143,5 +184,52 @@ public class ChatActivity extends AppCompatActivity {
     private String getReadableDate(Date date){
         return new SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.getDefault()).format(date);
     }
+
+    private void addConversion(HashMap<String, Object> conversion){
+        firestore.collection(KEY_COLLECTION_CONVERSIONS)
+                .add(conversion)
+                .addOnSuccessListener(documentReference -> {
+                    conversationId = documentReference.getId();
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                });
+    }
+
+    private void updateConversion(String message){
+        DocumentReference documentReference =
+                firestore.collection(KEY_COLLECTION_CONVERSIONS).document(conversationId);
+        documentReference.update(KEY_LAST_MESSAGE, message,
+                KEY_TIMESTAMP, new Date());
+
+    }
+
+    private void checkForConversion(){
+        if (chatMessages.size() != 0){
+            checkForConversionRemotely(
+                    sharedPref.getLong("userId", 0),
+                   receiverUser.getUserId()
+            );
+            checkForConversionRemotely(
+                    receiverUser.getUserId(),
+                    sharedPref.getLong("userId", 0)
+            );
+        }
+    }
+
+    private void checkForConversionRemotely(long senderId, long receiverId){
+        firestore.collection(KEY_COLLECTION_CONVERSIONS)
+                .whereEqualTo(KEY_SENDER_ID, senderId)
+                .whereEqualTo(KEY_RECEIVER_ID, receiverId)
+                .get()
+                .addOnCompleteListener(conversionOnCompleteListener);
+    }
+
+    private final OnCompleteListener<QuerySnapshot> conversionOnCompleteListener = task -> {
+        if(task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments().size() > 0) {
+            DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+            conversationId = documentSnapshot.getId();
+        }
+    };
 
 }
