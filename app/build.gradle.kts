@@ -51,7 +51,7 @@ dependencies {
     implementation(libs.sdp)
     implementation(libs.ssp)
     implementation(libs.multidex)
-    implementation(libs.firebase)
+    implementation(platform(libs.firebase))
     implementation(libs.roundedimageview)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.firestore)
