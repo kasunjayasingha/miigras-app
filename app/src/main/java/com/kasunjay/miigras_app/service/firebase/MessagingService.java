@@ -25,7 +25,9 @@ public class MessagingService extends FirebaseMessagingService {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
         }
         if (remoteMessage.getNotification() != null) {
-//            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+            String message = remoteMessage.getNotification().getBody();
+            // Display the message or update the UI
+            Log.d(TAG, "Message received: " + message);
         }
     }
 
