@@ -86,17 +86,17 @@ public class LocationService extends Service {
 //        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY , 10 * 60 * 1000)
 //                .setMinUpdateIntervalMillis(5 * 60 * 1000)
 //                .build();
-//        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 120000) // 2 minutes
-//                .setMinUpdateIntervalMillis(120000) // 2 minutes
-//                .build();
+        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 20000) // 20 seconds
+                .setMinUpdateIntervalMillis(20000) // 20 seconds
+                .build();
 
         Random random = new Random();
 // Generate a random interval between 1 minute (60000 ms) and 5 minutes (300000 ms)
         long randomInterval = 60000 + random.nextInt(1140000); // 1140000 ms is the range (20 minutes - 1 minute)
 
-        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, randomInterval)
-                .setMinUpdateIntervalMillis(randomInterval)
-                .build();
+//        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, randomInterval)
+//                .setMinUpdateIntervalMillis(randomInterval)
+//                .build();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "requestLocationUpdates: Location permission not granted");

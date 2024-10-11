@@ -72,6 +72,7 @@ public class PredictionActivity extends AppCompatActivity {
     private ChatAdapter chatAdapter;
     private FirebaseFirestore firestore;
     SharedPreferences sharedPref;
+    SharedPreferences employeeDetails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +81,7 @@ public class PredictionActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         sharedPref = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        employeeDetails = getSharedPreferences(SHARED_PREF_EMPLOYEE_DETAILS, Context.MODE_PRIVATE);
 
         setListeners();
         loadReceiverUser();
@@ -178,7 +180,8 @@ public class PredictionActivity extends AppCompatActivity {
     private void sendPredictionMessage(String message) {
         JSONObject payload = new JSONObject();
         try {
-            payload.put("employeeId", sharedPref.getLong("userId", 0));
+            JSONObject employeeDetailsJson = new JSONObject(employeeDetails.getString(SHARED_PREF_EMPLOYEE_DETAILS, ""));
+            payload.put("employeeId", employeeDetailsJson.getLong("id"));
             payload.put("message", message);
             payload.put("fcmToken", sharedPref.getString(Constants.KEY_FCM_TOKEN, ""));
         } catch (JSONException e) {
